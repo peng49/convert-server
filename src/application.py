@@ -7,11 +7,10 @@ import uuid
 import web
 
 urls = (
-    '/toPDF', 'ToPDF'
+    '/api/transform', 'Transform'
 )
 
-
-class ToPDF:
+class Transform:
     _allow_params = [
         '',
     ]
@@ -19,12 +18,8 @@ class ToPDF:
     def __init__(self):
         pass
 
-    def GET(self):
-        pass
-
     def POST(self):
         body = json.loads(web.data())
-
         try:
             filename = uuid.uuid4().hex
             with open("/tmp/" + filename + ".html", "w+") as f:
@@ -33,7 +28,7 @@ class ToPDF:
             # 接收前端传递的参数并通过参数生成命令
             options = body['options']
             command_option = ""
-            print options
+
             for option in options:
                 command_option = command_option + " " + option['label'] + " " + option['value']
 
