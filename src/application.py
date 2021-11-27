@@ -39,7 +39,7 @@ class Transform:
 
             # 读取生成的pdf文件,将文件内容转为base64编码
             with open("/tmp/" + filename + ".pdf", "rb") as f:
-                data = base64.b64encode(f.read())
+                data = base64.b64encode(f.read()).decode('utf-8')
 
             # 删除生成的缓存文件
             os.remove("/tmp/" + filename + ".html")
