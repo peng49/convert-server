@@ -13,6 +13,7 @@ _root_dir = os.path.dirname(os.path.abspath(__file__))
 with open(f'{_root_dir}/params_setting.json', 'r') as o:
     _params_setting = json.loads(o.read())
 
+
 class Convert:
     def __init__(self):
         pass
@@ -119,6 +120,9 @@ class Convert:
 
             if body['method'] == 'html2pdf':
                 data = self.html2pdf(body)
+
+            if body['method'] == 'pdf2image':
+                data = self.pdf2image(body)
 
             return json.dumps({'code': 200, 'message': 'Success', 'data': data})
         except BaseException as e:
