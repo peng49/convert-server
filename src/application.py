@@ -3,38 +3,26 @@ import base64
 import json
 import os
 import uuid
-
 import web
 
 urls = (
     '/api/convert', 'Convert'
 )
 
-class Convert:
-    _allow_params = {
-        'html2pdf': [
-            '--page-height',
-            '--page-width',
-            '--margin-top',
-            '--margin-bottom',
-            '--margin-left',
-            '--margin-right',
-        ],
-        'html2image': [
-            '--crop-h',
-            '--crop-w'
-        ]
-    }
+_root_dir = os.path.dirname(os.path.abspath(__file__))
+with open(f'{_root_dir}/params_setting.json', 'r') as o:
+    _params_setting = json.loads(o.read())
 
+class Convert:
     def __init__(self):
         pass
 
     @staticmethod
     def __generate_command_params(options, method):
         command_option = ""
-        if method not in Convert._allow_params.keys():
+        if method not in _params_setting.keys():
             return command_option
-        keys = Convert._allow_params[method]
+        keys = _params_setting[method]
         for option in options:
             if option['label'] in keys:
                 command_option = command_option + " " + option['label'] + " " + option['value']
@@ -70,7 +58,7 @@ class Convert:
     def html2image(body):
         filename = uuid.uuid4().hex
         suffix = 'png'
-        with open("/tmp/" + filename + ".html", "w+") as f:
+        with open(f"/tmp/{filename}.html", "w+") as f:
             f.write(body['htmlContent'])
 
         try:
@@ -93,9 +81,31 @@ class Convert:
 
         return data
 
-    def pdf2image(self):
-        # image
-        pass
+    @staticmethod
+    def pdf2image(body):
+        filename = uuid.uuid4().hex
+        suffix = 'png'
+        with open(f"/tmp/{filename}.pdf", "w+") as f:
+            f.write(body['pdfContent'])
+
+        try:
+            # 接收前端传递的参数并通过参数生成命令
+            command_option = Convert.__generate_command_params(body['options'], 'pdf2image')
+
+            command = f"convert {command_option} /tmp/{filename}.pdf /tmp/{filename}.{suffix}"
+
+            # 执行命令生成图片
+            res = os.system(command)
+
+            # 读取生成的图片,将图片转为base64编码
+            with open(f"/tmp/{filename}.{suffix}", "rb") as f:
+                data = base64.b64encode(f.read()).decode('utf-8')
+        finally:
+            # 删除生成的缓存文件
+            os.remove(f"/tmp/{filename}.pdf")
+            if os.path.exists(f"/tmp/{filename}.{suffix}"):
+                os.remove(f"/tmp/{filename}.{suffix}")
+        return data
 
     def POST(self):
         body = json.loads(web.data())
