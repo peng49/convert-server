@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.9"
+
+services:
+  - docker
+
+install:
+  - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+# build docker image
+script:
+  - docker build -t ${DOCKER_USERNAME}/convert-server:latest .
+  - docker push ${DOCKER_USERNAME}/convert-server:latest
